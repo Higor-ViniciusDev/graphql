@@ -11,6 +11,26 @@ import (
 	"github.com/Higor-ViniciusDev/graphql/graph/model"
 )
 
+// Cursos is the resolver for the cursos field.
+func (r *categoriaResolver) Cursos(ctx context.Context, obj *model.Categoria) ([]*model.Curso, error) {
+	crusos, err := r.CursoDB.FindByCategoriaID(obj.ID)
+
+	if err != nil {
+		return nil, fmt.Errorf("erro ao buscar cursos por categoria: %w", err)
+	}
+
+	var result []*model.Curso
+	for _, curso := range crusos {
+		result = append(result, &model.Curso{
+			ID:        curso.ID,
+			Nome:      curso.Nome,
+			Descricao: &curso.Descricao,
+		})
+	}
+
+	return result, nil
+}
+
 // CreateCategoria is the resolver for the createCategoria field.
 func (r *mutationResolver) CreateCategoria(ctx context.Context, input model.NewCategoria) (*model.Categoria, error) {
 	categoria, err := r.CategoriaDB.Create(input.Nome, *input.Descricao)
@@ -81,26 +101,15 @@ func (r *queryResolver) Curso(ctx context.Context) ([]*model.Curso, error) {
 	return result, nil
 }
 
+// Categoria returns CategoriaResolver implementation.
+func (r *Resolver) Categoria() CategoriaResolver { return &categoriaResolver{r} }
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+type categoriaResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
-}
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
-}
-*/
