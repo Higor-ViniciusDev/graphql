@@ -1,0 +1,38 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Categoria {
+  id: ID!
+  nome: String!
+  descricao: String
+  cursos: [Curso!]!
+}
+
+type Curso {
+  id: ID!
+  nome: String!
+  descricao: String
+  categoria: Categoria!
+}
+
+type Query {
+  categoria: [Categoria!]!
+  curso: [Curso!]!
+}
+
+input NewCategoria {
+  nome: String!
+  descricao: String
+}
+
+input NewCurso {
+  nome: String!
+  descricao: String
+  categoriaId: ID!
+}
+
+type Mutation {
+  createCategoria(input: NewCategoria!): Categoria!
+  createCurso(input: NewCurso!): Curso!
+}
