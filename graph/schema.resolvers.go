@@ -13,14 +13,14 @@ import (
 
 // Cursos is the resolver for the cursos field.
 func (r *categoriaResolver) Cursos(ctx context.Context, obj *model.Categoria) ([]*model.Curso, error) {
-	crusos, err := r.CursoDB.FindByCategoriaID(obj.ID)
+	cursos, err := r.CursoDB.FindByCategoriaID(obj.ID)
 
 	if err != nil {
 		return nil, fmt.Errorf("erro ao buscar cursos por categoria: %w", err)
 	}
 
 	var result []*model.Curso
-	for _, curso := range crusos {
+	for _, curso := range cursos {
 		result = append(result, &model.Curso{
 			ID:        curso.ID,
 			Nome:      curso.Nome,
@@ -29,6 +29,21 @@ func (r *categoriaResolver) Cursos(ctx context.Context, obj *model.Categoria) ([
 	}
 
 	return result, nil
+}
+
+// Categoria is the resolver for the categoria field.
+func (r *cursoResolver) Categoria(ctx context.Context, obj *model.Curso) (*model.Categoria, error) {
+	categoria, err := r.CategoriaDB.FindByCursoID(obj.ID)
+
+	if err != nil {
+		return nil, fmt.Errorf("erro ao buscar categoria por ID: %w", err)
+	}
+
+	return &model.Categoria{
+		ID:        categoria.ID,
+		Nome:      categoria.Nome,
+		Descricao: &categoria.Descricao,
+	}, nil
 }
 
 // CreateCategoria is the resolver for the createCategoria field.
@@ -104,6 +119,9 @@ func (r *queryResolver) Curso(ctx context.Context) ([]*model.Curso, error) {
 // Categoria returns CategoriaResolver implementation.
 func (r *Resolver) Categoria() CategoriaResolver { return &categoriaResolver{r} }
 
+// Curso returns CursoResolver implementation.
+func (r *Resolver) Curso() CursoResolver { return &cursoResolver{r} }
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -111,5 +129,6 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type categoriaResolver struct{ *Resolver }
+type cursoResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
